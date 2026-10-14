@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Unix for Biology</title>
+<style>
+:root{--bg:#f4f7f5;--surface:#ffffff;--ink:#17231c;--mute:#556b60;--line:#d2ddd7;--accent:#1b7a4e;--accent-ink:#ffffff;--code:#0f1c15;--code-ink:#d5fae6;--ok:#14794a;--bad:#b53225;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0f1713;--surface:#17221c;--ink:#e4ede8;--mute:#8fa89b;--line:#293c33;--accent:#42b983;--accent-ink:#0c1c14;--code:#080e0a;--code-ink:#cbf7de;--ok:#4ed38f;--bad:#ff7869}}
+:root[data-theme="dark"]{--bg:#0f1713;--surface:#17221c;--ink:#e4ede8;--mute:#8fa89b;--line:#293c33;--accent:#42b983;--accent-ink:#0c1c14;--code:#080e0a;--code-ink:#cbf7de;--ok:#4ed38f;--bad:#ff7869}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 Georgia,"Iowan Old Style",serif}
+h1,h2,h3,button,nav,.tag,.meta,label{font-family:"Trebuchet MS","Segoe UI",system-ui,sans-serif}
+header{padding:28px 20px 8px;max-width:1000px;margin:0 auto}
+h1{font-size:clamp(1.7rem,4vw,2.4rem);line-height:1.15;margin:0 0 8px}
+header p{max-width:62ch;color:var(--mute);margin:0 0 14px}
+.bar{height:8px;background:var(--line);border-radius:4px;overflow:hidden;max-width:420px}
+.bar i{display:block;height:100%;width:0;background:var(--accent);transition:width .3s}
+.meta{font-size:.85rem;color:var(--mute);margin-top:6px}
+.wrap{display:grid;grid-template-columns:230px 1fr;gap:24px;max-width:1000px;margin:0 auto;padding:16px 20px 60px}
+nav{position:sticky;top:calc(12px + env(safe-area-inset-top,0px));align-self:start;display:flex;flex-direction:column;gap:4px}
+nav button{text-align:left;background:none;border:1px solid transparent;color:var(--ink);padding:8px 10px;border-radius:6px;cursor:pointer;font-size:.92rem}
+nav button:hover{border-color:var(--line)}
+nav button[aria-current="true"]{background:var(--surface);border-color:var(--accent);font-weight:700}
+nav button.done::after{content:" ✓";color:var(--ok)}
+main{min-width:0}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:20px;margin-bottom:16px}
+h2{margin:0 0 4px;font-size:1.5rem}
+h3{margin:0 0 8px;font-size:1.05rem}
+.goal{color:var(--mute);margin:0 0 12px}
+ul{padding-left:20px;margin:0}
+pre{background:var(--code);color:var(--code-ink);padding:14px;border-radius:6px;overflow-x:auto;font:13.5px/1.5 ui-monospace,Menlo,Consolas,monospace;margin:4px 0 10px}
+code{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.9em}
+.lang{font:600 .8rem "Trebuchet MS",system-ui,sans-serif;color:var(--mute)}
+.filters{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+.filters button,.btn{border:1px solid var(--line);background:var(--surface);color:var(--ink);padding:5px 11px;border-radius:999px;cursor:pointer;font-size:.85rem}
+.filters button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);border-radius:6px;padding:8px 14px}
+.res,.exr{display:flex;gap:10px;padding:9px 0;border-top:1px solid var(--line);align-items:baseline}
+.res:first-of-type,.exr:first-of-type{border-top:0}
+.exr{align-items:center;justify-content:space-between}
+.exr code{background:var(--bg);border:1px solid var(--line);border-radius:4px;padding:1px 6px;word-break:break-all}
+.exr span{color:var(--mute);font-size:.92rem;display:block;margin-top:2px}
+.tag{flex:none;font-size:.75rem;border:1px solid var(--line);border-radius:4px;padding:1px 6px;color:var(--mute);min-width:62px;text-align:center}
+.res a{color:var(--accent);font-weight:600;text-decoration:none}
+.res a:hover{text-decoration:underline}
+.res span.n{color:var(--mute);font-size:.9rem}
+.q{margin:12px 0}
+.q p{margin:0 0 6px;font-weight:600}
+.opt{display:block;width:100%;text-align:left;margin:4px 0;padding:8px 10px;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:6px;cursor:pointer;font:inherit}
+.opt.ok{border-color:var(--ok);background:color-mix(in srgb,var(--ok) 15%,var(--surface))}
+.opt.bad{border-color:var(--bad);background:color-mix(in srgb,var(--bad) 15%,var(--surface))}
+.why{font-size:.92rem;color:var(--mute);margin-top:4px}
+.row{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:center}
+.pgrow{display:flex;gap:8px;align-items:end;flex-wrap:wrap;margin-bottom:8px}
+.pgrow label{font-size:.82rem;color:var(--mute);display:block}
+input,textarea{width:100%;font:14px ui-monospace,Menlo,Consolas,monospace;background:var(--bg);color:var(--ink);border:1px solid var(--line);border-radius:6px;padding:8px}
+.out{white-space:pre-wrap;word-break:break-word;font:14px/1.6 ui-monospace,Menlo,Consolas,monospace;padding:10px;border:1px solid var(--line);border-radius:6px;background:var(--bg);margin-top:8px;min-height:48px}
+#st{font-size:.9rem;color:var(--mute);margin-top:6px;min-height:1.4em}
+button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+@media(max-width:760px){.wrap{grid-template-columns:1fr}nav{position:static;flex-direction:row;flex-wrap:wrap}}
+</style>
+</head>
+<body>
+<header>
+<h1>Unix for Biology</h1>
+<p>A hands-on, practical course on harnessing the Unix shell for biological data. Learn how to inspect FASTA/FASTQ files, filter genomic tables (BED/VCF/GFF), parse annotations with awk and sed, and build reproducible bioinformatics one-liners. Modules 1 to 6 focus on core Unix tools; modules 7 and 8 introduce scalable workflows, cluster computing, and reproducible pipelines.</p>
+<div class="bar" aria-hidden="true"><i id="pb"></i></div>
+<div class="meta" id="pt"></div>
+</header>
+<div class="wrap">
+<nav id="nav" aria-label="Modules"></nav>
+<main>
+<div class="card" id="pg">
+<h3>Live Biological Unix Sandbox</h3>
+<div class="pgrow">
+  <div style="flex:1">
+    <label for="cmd">Pipeline Command (simulates grep, awk, sed, cut, sort, uniq, wc, head, tail)</label>
+    <input id="cmd" spellcheck="false" autocomplete="off" placeholder="grep '^>' | wc -l">
+  </div>
+  <button class="btn primary" id="runbtn">Run Pipeline</button>
+</div>
+<label for="txt" style="font-size:.82rem;color:var(--mute)">Sample Biological File / Standard Input</label>
+<textarea id="txt" rows="6" spellcheck="false"></textarea>
+<div class="out" id="out" aria-live="polite"></div>
+<div id="st"></div>
+<div class="meta">In-browser pipeline emulator. Supports Unix pipes (|), simple quotes, and foundational arguments for quick biological prototyping.</div>
+</div>
+<div id="mod"></div>
+</main>
+</div>
+<script>
+var M=[
+{
+  t:"The Biologist's Shell & File Navigation",
+  time:"2 to 3 days",
+  goal:"Navigate genomics directories, organize raw project data, and inspect large sequencing files without loading entire gigabytes into RAM.",
+  learn:[
+    "Biological datasets (FASTQ, FASTA, BAM, VCF) are often tens of gigabytes; opening them in standard text editors or spreadsheets crashes your machine. Unix tools stream data line-by-line efficiently.",
+    "Essential filesystem commands: pwd (where am I), ls -lh (list files with human-readable sizes), cd (change directory), mkdir -p (create project tree).",
+    "Inspect large files safely: head -n 20 shows the beginning, tail -n 20 the end, and less -S allows scrolling without wrapping long sequencing lines.",
+    "Inspect compressed genomic files directly without uncompressing to disk using zcat, gzcat, or zless."
+  ],
+  ex:[
+    ["head -n 4",">seq1 Human TP53\nATGCGATCGATCG\n>seq2 Mouse Trp53\nATGCGATCGATAA\n>seq3 Zebrafish tp53\nATGCGATCGATCC","Inspect the first 4 lines of a multi-FASTA file."],
+    ["tail -n 2",">seq1\nATGC\n>seq2\nTTAA\n>seq3\nGGCC","Check the end of a sequence file for truncated records."],
+    ["wc -l","@read1\nATCG\n+\nIIII\n@read2\nGCTA\n+\nIIII","Count total lines to determine read count (divide by 4 for FASTQ)."]
+  ],
+  app:"Inspecting raw NGS run folders, validating sample manifests, and sanity-checking downloaded reference genomes without unzipping large archives.",
+  py:"# Python equivalent of streaming lines without loading entire file\nwith open('reads.fastq') as f:\n    first_four = [next(f) for _ in range(4)]\nprint(''.join(first_four))",
+  r:"# R connection streaming top records\ncon <- file('reads.fastq', 'r')\nreadLines(con, n = 4)\nclose(con)",
+  res:[
+    ["Practice","Software Carpentry: The Unix Shell","https://swcarpentry.github.io/shell-novice/","Gold standard beginner tutorial for researchers"],
+    ["Book","Bioinformatics Data Skills","https://www.oreilly.com/library/view/bioinformatics-data-skills/9781449367480/","Vince Buffalo's definitive guide to Unix in computational biology"],
+    ["Cheat sheet","MIT Unix Cheat Sheet","https://web.mit.edu/music21/doc/developerReference/unixCheatSheet.html","Concise command reference"],
+    ["Video","Bioinformatics Coach (YouTube)","https://www.youtube.com/@BioinformaticsCoach","Practical terminal navigation for genomic data"]
+  ],
+  quiz:[
+    ["Why is 'cat large_reads.fastq' problematic in an interactive terminal?",["It deletes the file","It floods the terminal buffer with millions of lines, freezing the terminal","It corrupts the sequencing quality scores"],1,"cat writes everything immediately to stdout; for million-read files, use less or head."],
+    ["How do you display file sizes in megabytes and gigabytes in ls?",["ls -mb","ls -lh","ls -s"],1,"The -h flag formats sizes in human-readable units (K, M, G)."],
+    ["A FASTQ file has 40,000,000 lines. How many sequencing reads does it hold?",["40,000,000","20,000,000","10,000,000"],2,"Each FASTQ record comprises exactly 4 lines (header, sequence, strand, quality score)."]
+  ]
+},
+{
+  t:"Pattern Searching in Sequences with Grep",
+  time:"3 to 4 days",
+  goal:"Locate motifs, count sequence headers, isolate gene identifiers, and filter genomic records with regular expressions.",
+  learn:[
+    "grep searches plain text for lines matching regular expressions. In biology, it is the fastest way to count reads, find motifs, or pull specific chromosomes.",
+    "Common flags: -c (count matching lines), -v (invert match/exclude), -n (show line number), -i (ignore case), -E (extended regex), and -B/-A (context before/after).",
+    "Searching headers: grep '^>' file.fasta extracts FASTA headers. Counting FASTQ reads: grep -c '^@SRR' sample.fastq.",
+    "Extract sequence matches with grep -o, or filter out unmapped/comment lines with grep -v '^#'."
+  ],
+  ex:[
+    ["grep '^>'",">chr1 reference\nATCG\n>chr2 reference\nGGTA\n# Comment line\nTTTT","Extract all FASTA headers from a reference genome."],
+    ["grep -c '^>'",">seq1\nATCG\n>seq2\nGGTA\n>seq3\nTTTT","Count the total number of FASTA entries."],
+    ["grep -v '^#'","# Format=VCFv4.2\n# Chrom Pos ID\nchr1 100 rs123\nchr1 250 rs456","Strip comment and header lines from genomic files like VCFs."],
+    ["grep -E 'TATAA[AT]A[AT]'",">promoter1\nCGTATAAATACTG\n>promoter2\nCGTATAATATCTG\n>promoter3\nCGGGGGGGGGCTG","Find TATA-box core promoter consensus motifs."]
+  ],
+  app:"Screening sequencing libraries for adapter contamination, verifying presence of specific marker genes, and filtering VCF files.",
+  py:"import re\nwith open('seqs.fa') as f:\n    headers = [line.strip() for line in f if line.startswith('>')]\nprint(f'Found {len(headers)} sequences')",
+  r:"lines <- readLines('seqs.fa')\nheaders <- grep('^>', lines, value = TRUE)\nlength(headers)",
+  res:[
+    ["Docs","GNU Grep Manual","https://www.gnu.org/software/grep/manual/grep.html","Full POSIX and GNU grep options"],
+    ["Guide","Next Generation Sequencing Shell Cheatsheet","https://github.com/stephenturner/oneliners","Stephen Turner's classic bioinformatic oneliners"],
+    ["Practice","Rosalind Bioinformatics","https://rosalind.info/problems/locations/","Bioinformatics problems directly solvable via command line"],
+    ["Video","OMGenomics (YouTube)","https://www.youtube.com/@OMGenomics","Tutorials on grep and pattern matching in genomics"]
+  ],
+  quiz:[
+    ["Which command counts how many chromosomes/scaffolds are in genome.fasta?",["grep -l '>' genome.fasta","grep -c '^>' genome.fasta","wc -c genome.fasta"],1,"The -c flag counts matching lines; '^>' targets FASTA header lines."],
+    ["How do you discard comment lines starting with '#' from a GFF or VCF file?",["grep '^#' file.vcf","grep -v '^#' file.vcf","grep -d '#' file.vcf"],1,"The -v flag inverts the search, outputting only lines that do NOT match."],
+    ["Why must you be cautious using grep '^@' to count reads in a FASTQ file?",["FASTQ quality score lines can also begin with '@'","The '@' symbol is forbidden in bash","FASTQ headers always start with '>'"],0,"Quality lines can start with '@' if a base has Q=31 (ASCII 64). Matching '^@ID' or dividing total lines by 4 is safer."]
+  ]
+},
+{
+  t:"Working with Tabular Genomic Data: Cut, Sort & Uniq",
+  time:"3 to 4 days",
+  goal:"Slice columns, sort genomic coordinates, remove PCR duplicates, and aggregate frequency tables across BED, TSV, and SAM files.",
+  learn:[
+    "Genomic data is overwhelmingly tabular: BED (coordinates), GFF/GTF (annotations), VCF (variants), and TSV expression matrices.",
+    "cut extracts columns: cut -f 1,4,5 file.bed extracts chromosome, start, and end. Default delimiter is tab; set comma with -d ','.",
+    "sort organizes lines: use -k for column selection, -n for numeric sorting, and -V for natural version sorting (e.g., chr1, chr2 ... chr10 instead of chr1, chr10, chr2).",
+    "uniq eliminates adjacent duplicate lines; uniq -c generates frequency tables. Note: input MUST be sorted first for uniq to work properly."
+  ],
+  ex:[
+    ["cut -f 1,3","chr1\t100\t200\tgeneA\nchr2\t500\t600\tgeneB\nchr1\t300\t400\tgeneC","Extract chromosome and end position (columns 1 and 3)."],
+    ["sort -k1,1 -k2,2n","chr2\t50\nchr1\t100\nchr1\t20\nchr2\t10","Sort primarily by chromosome name, then secondarily by start coordinate numerically."],
+    ["sort | uniq -c","TP53\nEGFR\nTP53\nBRCA1\nEGFR\nTP53","Sort and compute gene occurrence frequencies."]
+  ],
+  app:"Preparing BED files for bedtools (which requires sorted coordinates), tallying reads mapping to gene IDs, and removing redundant sample records.",
+  py:"import pandas as pd\ndf = pd.read_csv('regions.bed', sep='\\t', header=None)\nsorted_df = df.sort_values(by=[0, 1])\ncounts = df[3].value_counts()",
+  r:"library(dplyr)\ndf <- read.table('regions.bed', sep='\\t')\ndf %>% arrange(V1, V2) %>% count(V4)",
+  res:[
+    ["Docs","GNU Coreutils: cut, sort, uniq","https://www.gnu.org/software/coreutils/manual/","Standard reference manual"],
+    ["Book","Bioinformatics Data Skills, Ch. 7","https://www.oreilly.com/library/view/bioinformatics-data-skills/9781449367480/","Unix data manipulation workflows"],
+    ["Guide","UCSC Genome Browser File Formats","https://genome.ucsc.edu/FAQ/FAQformat.html","Specifications for BED, GTF, and SAM formats"],
+    ["Tool","bioawk GitHub","https://github.com/lh3/bioawk","Heng Li's extension to awk with native biological formats"]
+  ],
+  quiz:[
+    ["Why does 'uniq file.txt' fail to collapse all duplicate rows?",["uniq only detects identical adjacent lines; you must run sort first","uniq only works on numbers","uniq is deprecated"],0,"uniq compares lines sequentially; unadjacent duplicates are ignored unless sorted first."],
+    ["Which sort option correctly sorts chromosome positions (10, 2, 100) mathematically?",["-s","-n","-a"],1,"The -n flag specifies numeric sort. Without it, lexical sort puts 100 before 2."],
+    ["Which flag sets the column delimiter to tab in the cut command?",["-d $'\\t' (or tab by default)","-t '\\t'","-f tab"],0,"By default cut uses tab; with other delimiters, specify with -d."]
+  ]
+},
+{
+  t:"Stream Editing and Sequence Cleaning with Sed",
+  time:"3 to 4 days",
+  goal:"Perform find-and-replace, reformat chromosome identifiers, clean sequence names, and extract precise coordinate spans with sed.",
+  learn:[
+    "sed (stream editor) parses text line-by-line and applies transformation scripts without manual editing.",
+    "Substitution: sed 's/old/new/g' file. The 'g' flag replaces all occurrences on each line.",
+    "Address selection: apply edits only to matching lines (e.g., sed '/^chrM/d' removes mitochondrial chromosome records).",
+    "Tidying NCBI headers to Ensembl style: sed 's/^>NC_000001.11/>chr1/' harmonizes genome references.",
+    "Extract specific line ranges: sed -n '100,105p' prints lines 100 through 105."
+  ],
+  ex:[
+    ["sed 's/^chr//'","chr1\t100\t200\nchr2\t300\t400\nchrX\t50\t100","Strip 'chr' prefixes to convert UCSC to Ensembl chromosome format."],
+    ["sed 's/T/U/g'","AUGCA\nATCGATCG\nTTTGGG","Transcribe DNA sequences to RNA by substituting Thymine with Uracil."],
+    ["sed '/^chrM/d'","chr1\t100\nchrM\t50\nchr2\t200\nchrM\t300","Drop mitochondrial chromosome records from an alignment dataset."]
+  ],
+  app:"Harmonizing chromosome names between UCSC (chr1) and Ensembl (1), cleaning FASTA definition lines before blast, and transforming tabular metadata.",
+  py:"import re\nwith open('genes.txt') as f:\n    clean = [re.sub(r'^chr', '', line) for line in f]\nprint(''.join(clean))",
+  r:"lines <- c('chr1\t100', 'chr2\t200')\ngsub('^chr', '', lines)",
+  res:[
+    ["Docs","GNU Sed Manual","https://www.gnu.org/software/sed/manual/sed.html","Comprehensive guide to sed scripting"],
+    ["Tutorial","Sed by Example (Bruce Barnett)","https://www.grymoire.com/Unix/Sed.html","Clear, thorough step-by-step sed guide"],
+    ["Guide","Biostars: Common sed recipes","https://www.biostars.org/","Search Biostars for bioinformatic sed oneliners"],
+    ["Practice","Sed stream editor exercises","https://regexone.com","Pattern syntax review"]
+  ],
+  quiz:[
+    ["What does sed 's/chr//g' do?",["Deletes all files named chr","Replaces every occurrence of 'chr' in each line with nothing","Appends 'chr' to every line"],1,"The empty replacement '//' strips the matched string globally on each line."],
+    ["How do you edit a file directly in place on GNU sed?",["sed -w file","sed -i file","sed --save file"],1,"The -i flag performs an in-place edit on the file."],
+    ["What does sed -n '2p' input.fasta do?",["Prints line 2 and suppresses automatic printing of other lines","Duplicates line 2","Deletes line 2"],0,"-n suppresses default printing, and 2p explicitly prints only line 2."]
+  ]
+},
+{
+  t:"Genomic Table Crunching with Awk",
+  time:"4 to 5 days",
+  goal:"Filter features by coordinate length, compute mean sequencing coverage, calculate GC content, and reformat genomic files on the fly.",
+  learn:[
+    "awk is a complete pattern-scanning and field-processing language included on every Unix system. It operates on columns ($1, $2, $3...) and rows automatically.",
+    "Built-in variables: NR (current record/line number), NF (number of fields in line), FS (field separator, tab is default in bioawk or via awk -F'\\t').",
+    "Filtering by coordinate length: awk '$3 - $2 > 1000' file.bed outputs features longer than 1 kb.",
+    "Mathematical summaries: awk '{sum+=$3} END {print sum/NR}' calculates column averages in a single streaming pass."
+  ],
+  ex:[
+    ["awk '$3 - $2 > 100'","chr1\t100\t150\nchr1\t200\t450\nchr2\t50\t80\nchr2\t100\t500","Filter BED features whose span exceeds 100 base pairs."],
+    ["awk '{print $1,$3-$2}'","chr1\t100\t200\nchr2\t500\t800","Print chromosome and length ($3 - $2) for every feature."],
+    ["awk '{s+=$2} END {print s/NR}'","geneA\t10\ngeneB\t20\ngeneC\t30","Calculate the mean expression value across all genes in column 2."]
+  ],
+  app:"Filtering VCF calls with QUAL > 30, computing gene length distributions from GTF/GFF files, and converting custom formats to BED files.",
+  py:"# Python streaming row filter\nwith open('features.bed') as f:\n    for line in f:\n        c = line.strip().split('\\t')\n        if int(c[2]) - int(c[1]) > 100:\n            print('\\t'.join(c))",
+  r:"# R data.table / dplyr streaming equivalent\ndf <- read.table('features.bed', sep='\\t')\nsubset(df, V3 - V2 > 100)",
+  res:[
+    ["Book","The AWK Programming Language (Aho, Kernighan, Weinberger)","https://archive.org/details/awk-book","The classic guide by the language authors"],
+    ["Tool","Bioawk GitHub Repository","https://github.com/lh3/bioawk","AWK modified with biological parsers ($seq, $qual, etc.)"],
+    ["Guide","Bioinformatics One-Liners (Awk section)","https://github.com/stephenturner/oneliners","Curated bioinformatics tasks solved with awk"],
+    ["Tutorial","Grymoire's Awk Tutorial","https://www.grymoire.com/Unix/Awk.html","Practical examples of fields, loops, and conditions"]
+  ],
+  quiz:[
+    ["In an awk script, what does $0 represent?",["The first field","The entire current line","The file name"],1,"$0 represents the entire line; $1 is field 1, $2 is field 2, and so forth."],
+    ["Which awk command filters a BED file for features located on 'chr1'?",["awk '$1 == \"chr1\"' file.bed","awk '{chr1}' file.bed","awk 'col(1)=\"chr1\"' file.bed"],0,"awk tests condition '$1 == \"chr1\"' before printing matching records."],
+    ["What does the END block in awk do?",["Halts execution immediately","Executes code after all input lines have been processed","Prints the final line only"],1,"BEGIN executes before reading lines; END executes after the last line is parsed."]
+  ]
+},
+{
+  t:"Pipes, Redirection & Assembling Bio-Pipelines",
+  time:"4 to 5 days",
+  goal:"Chain single-purpose tools with Unix pipes to process multi-gigabyte genomics files without creating intermediate disk bottlenecks.",
+  learn:[
+    "The Unix philosophy: write programs that do one thing well, and connect them with pipes (|) where stdout of one command feeds stdin of the next.",
+    "Redirection: > writes output to a new file, >> appends, and < feeds a file as stdin. Redirect stderr using 2> error.log.",
+    "Streaming pipeline efficiency: piping keeps intermediate data in memory buffers instead of writing tens of gigabytes to slow disk storage.",
+    "Process substitution: <(command) allows feeding the output of a command directly into tools expecting file paths (e.g., diff <(cut -f1 A.txt) <(cut -f1 B.txt))."
+  ],
+  ex:[
+    ["grep -v '^#' | cut -f 1 | sort | uniq -c","# VCF format\nchr1\t100\nchr2\t200\nchr1\t300\nchr1\t400\nchr3\t500","Count total variants per chromosome from a VCF stream in one line."],
+    ["cut -f 1,2 | sort -k2,2n | head -n 2","geneA\t50\ngeneB\t10\ngeneC\t30\ngeneD\t5","Find the two lowest expressed genes without writing temp files."],
+    ["grep '^>' | sed 's/>//' | sort",">Mus_musculus\nATCG\n>Homo_sapiens\nGCTA\n>Danio_rerio\nTTTA","Extract species names from FASTA, clean markers, and sort alphabetically."]
+  ],
+  app:"Streaming aligners (e.g., bwa mem ref.fa reads.fq | samtools view -bS - | samtools sort -o sorted.bam) directly without giant SAM intermediates.",
+  py:"import subprocess\ncmd = 'grep -v \"^#\" file.vcf | cut -f1 | sort | uniq -c'\nres = subprocess.check_output(cmd, shell=True, text=True)\nprint(res)",
+  r:"res <- system('grep -v \"^#\" file.vcf | cut -f1 | sort | uniq -c', intern = TRUE)\nprint(res)",
+  res:[
+    ["Article","The Unix Philosophy in Bioinformatics","https://www.nature.com/articles/nmeth.2413","Nature Methods perspective on modular computational pipelines"],
+    ["Guide","Data Science at the Command Line (Jeroen Janssens)","https://datascienceatthecommandline.com/2e/","Free book detailing pipeline engineering"],
+    ["Documentation","Bash Reference Manual: Redirections","https://www.gnu.org/software/bash/manual/bash.html#Redirections","Official guide to standard streams and redirection"],
+    ["Video","Bioinformatics DotCa (YouTube)","https://www.youtube.com/@bioinformaticsdotca","High-throughput sequencing analysis workflows"]
+  ],
+  quiz:[
+    ["What happens if you run 'command > file.bed' when file.bed already exists?",["It appends output to the bottom","It immediately overwrites the existing file.bed","It throws an error and aborts"],1,"The single > overwrites existing contents; use >> to append safely."],
+    ["What does 'samtools view file.bam 2> log.txt' do?",["Directs the BAM output to log.txt","Directs error/diagnostic messages (stderr) to log.txt while stdout remains on screen","Runs samtools twice"],1,"Stream descriptor 2 represents stderr, directing errors to the specified log."],
+    ["Why is streaming aligner output straight into samtools sort preferred over saving SAM files?",["SAM files are uncompressed and can consume hundreds of gigabytes of disk space","samtools cannot read files on disk","Streaming increases CPU temperature"],0,"Streaming avoids intermediate SAM generation, saving hundreds of gigabytes and reducing disk I/O bottlenecks."]
+  ]
+},
+{
+  t:"Bash Scripting & Batch Automation for High-Throughput Data",
+  time:"1 week",
+  goal:"Automate repetitive bioinformatics analyses across dozens of patient or sequencing samples using Bash scripts, loops, and variables.",
+  learn:[
+    "Variables and arguments: assign variables without spaces (SAMPLE='Patient_01') and access command-line arguments using $1, $2, $@.",
+    "Looping over sequencing libraries: for fq in *_R1.fastq.gz; do ... done iterates through whole experiment directories automatically.",
+    "Filename variable expansion: ${fq%_R1.fastq.gz}_R2.fastq.gz cleanly pairs forward and reverse sequencing read files.",
+    "Defensive scripting: always start scripts with 'set -euo pipefail' so workflows halt immediately on errors instead of silently creating empty files."
+  ],
+  ex:[
+    ["for s in sample1 sample2; do echo \"Processing $s.bam\"; done","","Iterate through a predefined list of biological sample IDs."],
+    ["for f in *.fasta; do echo \"== $f ==\"; grep -c '^>' \"$f\"; done","","Batch tally sequence records across multiple FASTA files."],
+    ["SAMPLE='SRR123456'; echo \"Aligning ${SAMPLE}_1.fq and ${SAMPLE}_2.fq\"","","Construct paired-end sample filenames dynamically."]
+  ],
+  app:"Automating multi-sample FastQC checks, batching variant calling pipelines, and standardizing project analyses.",
+  py:"import glob, subprocess\nfor fastq in glob.glob('*_R1.fastq.gz'):\n    r2 = fastq.replace('_R1.fastq.gz', '_R2.fastq.gz')\n    subprocess.run(['fastqc', fastq, r2])",
+  r:"fastqs <- list.files(pattern = '_R1.fastq.gz')\nfor(fq in fastqs) {\n    system(paste('fastqc', fq))\n}",
+  res:[
+    ["Guide","Defensive BASH Programming","https://kfirlavi.com/blog/2012/11/14/defensive-bash-programming/","Writing resilient automation scripts that will not fail silently"],
+    ["Documentation","Google Shell Style Guide","https://google.github.io/styleguide/shellguide.html","Best practices for readable, maintainable shell scripts"],
+    ["Book","Advanced Bash-Scripting Guide (Mendel Cooper)","https://tldp.org/LDP/abs/html/","Deep dive into arrays, functions, and parameter expansion"],
+    ["Tool","ShellCheck","https://www.shellcheck.net/","Static analysis and linter for bash scripts to spot common bugs"]
+  ],
+  quiz:[
+    ["Why should you put 'set -e' at the beginning of a bioinformatics Bash script?",["To enable extended regular expressions","To ensure the script exits immediately if any command returns an error","To run all commands in parallel"],1,"'set -e' stops execution on failures, preventing corrupted downstream analyses."],
+    ["How do you iterate over all FASTQ files in a directory in Bash?",["for f in *.fastq; do ... done","foreach f (*.fastq)","loop f in *.fastq"],0,"The standard Bourne/Bash syntax is 'for var in items; do ... done'."],
+    ["If FILE='sample_A.sorted.bam', what does ${FILE%.sorted.bam} evaluate to?",["sample_A","sample_A.sorted",".bam"],0,"The % operator strips the matching suffix from the variable."]
+  ]
+},
+{
+  t:"HPC Clusters, Bio-Environments & Production Reproducibility",
+  time:"Ongoing",
+  goal:"Run workflows on High-Performance Computing (HPC) clusters via SLURM, manage software dependencies with Conda/Mamba, and ensure reproducibility.",
+  learn:[
+    "Genomic data requires high-memory servers and clusters; you rarely run full pipelines on a local laptop.",
+    "HPC job schedulers (SLURM): submit non-interactive jobs using sbatch, query cluster status with squeue, and manage resource allocations (#SBATCH --cpus-per-task=8, --mem=32G).",
+    "Environment isolation: tools like samtools, bedtools, and GATK often require conflicting Python or C-library versions. Use Conda/Mamba or Pixi to preserve reproducible environments.",
+    "Reproducible pipeline engines: once one-liners grow into multi-step pipelines, transition to workflow managers (Nextflow, Snakemake) that integrate directly with Unix utilities."
+  ],
+  ex:[
+    ["sbatch --cpus-per-task=4 --mem=16G --wrap=\"bwa mem ref.fa r1.fq r2.fq > out.sam\"","","Submit an alignment job requesting 4 cores and 16 GB RAM to a SLURM cluster."],
+    ["mamba create -n rnaseq -c bioconda samtools bedtools fastqc","","Provision an isolated bioinformatics environment with Conda/Mamba."],
+    ["module avail; module load samtools/1.19","","Query and load environment modules on institutional HPC systems."]
+  ],
+  app:"Submitting exome-sequencing pipelines to institutional clusters, configuring automated RNA-seq processing, and sharing reproducible bioinformatics environments.",
+  py:"# Example Snakemake rule combining Unix pipe with software tool\n'''\nrule count_variants:\n    input: 'calls.vcf'\n    output: 'counts.txt'\n    shell:\n        'grep -v \"^#\" {input} | cut -f1 | sort | uniq -c > {output}'\n'''",
+  r:"# Calling HPC workflows via R batchtools\nlibrary(batchtools)\n# Manage cluster jobs directly from statistical environments",
+  res:[
+    ["Docs","Bioconda: The package manager for life sciences","https://bioconda.github.io/","Thousands of biological command-line tools installable in one command"],
+    ["Documentation","SLURM Workload Manager Quickstart","https://slurm.schedmd.com/quickstart.html","Guide to cluster partitions, job steps, and memory flags"],
+    ["Guide","Snakemake Workflow Engine","https://snakemake.readthedocs.io/","Reproducible data analysis scaling seamlessly from bash to clusters"],
+    ["Tutorial","Nextflow Documentation","https://www.nextflow.io/docs/latest/index.html","Data-driven pipeline orchestration with container support"],
+    ["Video","HPC Carpentry (YouTube)","https://www.youtube.com/@carpentries","Navigating and utilizing high-performance scientific clusters"]
+  ],
+  quiz:[
+    ["Why is Conda/Mamba preferred over compiling bioinformatics tools manually from source?",["It resolves complex dependencies and allows isolated per-project environments without root access","It makes programs run 10x faster","It converts C++ code into bash scripts"],0,"Bioconda packages pre-compiled binaries and manages distinct dependency trees per environment."],
+    ["What does the SLURM command 'squeue -u $USER' do?",["Cancels all jobs","Shows currently running and pending jobs for your username","Allocates more RAM"],1,"squeue queries the scheduling queue; -u filters by user."],
+    ["Why do bioinformaticians transition from pure Bash scripts to Nextflow or Snakemake for large pipelines?",["Bash cannot run Unix commands","Workflow managers automate resumption after crashes, track inputs/outputs, and manage cluster resources seamlessly","Bash is forbidden on HPC clusters"],1,"Workflow managers provide checkpointing, parallel task execution, and automated resource handling across multiple nodes."]
+  ]
+}
+];
+
+var KEY="unix-bio-course-done",done={},cur=0,filt="All";
+try{done=JSON.parse(localStorage.getItem(KEY)||"{}")}catch(e){}
+function g(i){return document.getElementById(i)}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(done))}catch(e){}}
+function esc(s){return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;")}
+function prog(){
+  var n=Object.keys(done).filter(function(k){return done[k]}).length;
+  g("pb").style.width=(100*n/M.length)+"%";
+  g("pt").textContent=n+" of "+M.length+" modules complete";
+}
+
+// Client-side bio-unix pipeline emulator
+function runBioUnix(pipeline, inputStr){
+  if(!pipeline.trim()) return inputStr;
+  var stages = pipeline.split("|").map(function(s){ return s.trim(); });
+  var lines = inputStr.split("\n");
+  if(lines.length === 1 && lines[0] === "") lines = [];
+
+  for(var p=0; p<stages.length; p++){
+    var stage = stages[p];
+    var parts = stage.match(/(?:[^\s"']+|"[^"]*"|'[^']*')+/g) || [];
+    if(parts.length === 0) continue;
+    var cmd = parts[0];
+    var args = parts.slice(1).map(function(a){
+      if((a.startsWith('"') && a.endsWith('"')) || (a.startsWith("'") && a.endsWith("'"))){
+        return a.slice(1, -1);
+      }
+      return a;
+    });
+
+    if(cmd === "grep"){
+      var invert = args.includes("-v");
+      var countOnly = args.includes("-c");
+      var patArg = args.filter(function(a){ return !a.startsWith("-"); })[0] || "";
+      var regex = new RegExp(patArg);
+      var matched = lines.filter(function(l){
+        var m = regex.test(l);
+        return invert ? !m : m;
+      });
+      lines = countOnly ? [String(matched.length)] : matched;
+    } else if(cmd === "wc"){
+      if(args.includes("-l")){
+        lines = [String(lines.length)];
+      } else {
+        var words = lines.join(" ").trim().split(/\s+/).filter(Boolean).length;
+        var chars = lines.join("\n").length;
+        lines = [lines.length + "\t" + words + "\t" + chars];
+      }
+    } else if(cmd === "head"){
+      var n = 10;
+      var ni = args.indexOf("-n");
+      if(ni >= 0 && args[ni+1]) n = parseInt(args[ni+1], 10) || 10;
+      lines = lines.slice(0, n);
+    } else if(cmd === "tail"){
+      var n = 10;
+      var ni = args.indexOf("-n");
+      if(ni >= 0 && args[ni+1]) n = parseInt(args[ni+1], 10) || 10;
+      lines = lines.slice(Math.max(0, lines.length - n));
+    } else if(cmd === "cut"){
+      var fields = [1];
+      var fi = args.indexOf("-f");
+      if(fi >= 0 && args[fi+1]){
+        fields = args[fi+1].split(",").map(function(x){ return parseInt(x, 10); });
+      }
+      lines = lines.map(function(l){
+        var cols = l.split("\t");
+        return fields.map(function(idx){ return cols[idx-1] !== undefined ? cols[idx-1] : ""; }).join("\t");
+      });
+    } else if(cmd === "sort"){
+      var numeric = args.includes("-n") || args.some(function(a){ return a.includes("n"); });
+      lines.sort(function(a, b){
+        if(numeric){
+          var na = parseFloat(a) || 0, nb = parseFloat(b) || 0;
+          return na - nb;
+        }
+        return a.localeCompare(b);
+      });
+    } else if(cmd === "uniq"){
+      var cCount = args.includes("-c");
+      var ures = [];
+      if(lines.length > 0){
+        var prev = lines[0];
+        var cnt = 1;
+        for(var i=1; i<lines.length; i++){
+          if(lines[i] === prev){
+            cnt++;
+          } else {
+            ures.push(cCount ? (cnt + " " + prev) : prev);
+            prev = lines[i];
+            cnt = 1;
+          }
+        }
+        ures.push(cCount ? (cnt + " " + prev) : prev);
+      }
+      lines = ures;
+    } else if(cmd === "sed"){
+      var expr = args.filter(function(a){ return !a.startsWith("-"); })[0] || "";
+      if(expr.startsWith("s/")){
+        var tokens = expr.split("/");
+        var find = tokens[1] || "";
+        var repl = tokens[2] !== undefined ? tokens[2] : "";
+        var isG = (tokens[3] || "").includes("g");
+        var re = new RegExp(find, isG ? "g" : "");
+        lines = lines.map(function(l){ return l.replace(re, repl); });
+      } else if(expr.endsWith("/d")){
+        var p = expr.slice(1, -2);
+        var dre = new RegExp(p);
+        lines = lines.filter(function(l){ return !dre.test(l); });
+      }
+    } else if(cmd === "awk"){
+      var code = args.filter(function(a){ return !a.startsWith("-"); })[0] || "";
+      if(code.indexOf("$3 - $2 >") >= 0){
+        var thresh = parseFloat(code.split(">")[1]) || 0;
+        lines = lines.filter(function(l){
+          var c = l.split(/\t|\s+/);
+          return (parseFloat(c[2]) - parseFloat(c[1])) > thresh;
+        });
+      } else if(code.indexOf("{print $1,$3-$2}") >= 0){
+        lines = lines.map(function(l){
+          var c = l.split(/\t|\s+/);
+          return c[0] + "\t" + ((parseFloat(c[2]) || 0) - (parseFloat(c[1]) || 0));
+        });
+      } else if(code.indexOf("sum/NR") >= 0 || code.indexOf("s/NR") >= 0){
+        var sum = 0, valid = 0;
+        lines.forEach(function(l){
+          var c = l.split(/\t|\s+/);
+          var val = parseFloat(c[1] !== undefined ? c[1] : c[0]);
+          if(!isNaN(val)){ sum += val; valid++; }
+        });
+        lines = [valid > 0 ? String(sum / valid) : "0"];
+      } else if(code.indexOf("$1 ==") >= 0){
+        var val = code.match(/["']([^"']+)["']/);
+        if(val && val[1]){
+          lines = lines.filter(function(l){
+            var c = l.split(/\t|\s+/);
+            return c[0] === val[1];
+          });
+        }
+      }
+    }
+  }
+  return lines.join("\n");
+}
+
+function runPipeline(){
+  var c = g("cmd").value;
+  var t = g("txt").value;
+  try {
+    var out = runBioUnix(c, t);
+    g("out").textContent = out;
+    var lineCount = out ? out.split("\n").length : 0;
+    g("st").textContent = "Pipeline finished. Produced " + lineCount + " output line" + (lineCount === 1 ? "" : "s") + ".";
+  } catch(err) {
+    g("out").textContent = "Error executing pipeline simulation: " + err.message;
+    g("st").textContent = "Execution failed.";
+  }
+}
+
+function load(e){
+  g("cmd").value = e[0];
+  g("txt").value = e[1];
+  runPipeline();
+  g("pg").scrollIntoView({behavior:"smooth"});
+}
+
+function nav(){
+  var h = "";
+  M.forEach(function(m, i){
+    h += '<button data-i="'+i+'"'+(i===cur?' aria-current="true"':"")+(done[i]?' class="done"':"")+">"+(i+1)+". "+esc(m.t)+'</button>';
+  });
+  g("nav").innerHTML = h;
+  g("nav").querySelectorAll("button").forEach(function(b){
+    b.onclick = function(){
+      cur = +b.dataset.i;
+      filt = "All";
+      nav();
+      render();
+      window.scrollTo(0,0);
+    };
+  });
+}
+
+function render(){
+  var m = M[cur], h = "";
+  h += '<div class="card"><h2>'+esc(m.t)+'</h2><div class="meta">Estimated Time: '+m.time+'</div><p class="goal"><strong>Goal:</strong> '+esc(m.goal)+'</p><h3>Key Concepts</h3><ul>'+m.learn.map(function(x){return"<li>"+esc(x)+"</li>";}).join("")+"</ul></div>";
+  h += '<div class="card"><h3>Examples: Click "Try it" to load into the sandbox</h3>'+m.ex.map(function(e, i){
+    return '<div class="exr"><div><code>'+esc(e[0])+'</code><span>'+esc(e[2])+'</span></div><button class="btn" data-e="'+i+'">Try it</button></div>';
+  }).join("")+'</div>';
+  h += '<div class="card"><h3>Biological Applications</h3><p style="margin:0">'+esc(m.app)+'</p></div>';
+  h += '<div class="card"><h3>Higher-Level Scripting Equivalent</h3><div class="lang">Python</div><pre><code>'+esc(m.py)+'</code></pre><div class="lang">R</div><pre><code>'+esc(m.r)+'</code></pre></div>';
+  
+  var ty = ["All"];
+  m.res.forEach(function(r){ if(ty.indexOf(r[0]) < 0) ty.push(r[0]); });
+  h += '<div class="card"><h3>Readings, Manuals, and Tools</h3><div class="filters">'+ty.map(function(t){
+    return '<button data-f="'+esc(t)+'" aria-pressed="'+(t===filt)+'">'+esc(t)+'</button>';
+  }).join("")+'</div>';
+  m.res.forEach(function(r){
+    if(filt === "All" || r[0] === filt){
+      h += '<div class="res"><span class="tag">'+esc(r[0])+'</span><div><a href="'+r[2]+'" target="_blank" rel="noopener noreferrer">'+esc(r[1])+'</a><br><span class="n">'+esc(r[3])+'</span></div></div>';
+    }
+  });
+  h += '</div><div class="card"><h3>Check Yourself</h3>';
+  m.quiz.forEach(function(q, qi){
+    h += '<div class="q" data-q="'+qi+'"><p>'+esc(q[0])+'</p>'+q[1].map(function(o, oi){
+      return '<button class="opt" data-o="'+oi+'">'+esc(o)+'</button>';
+    }).join("")+'<div class="why"></div></div>';
+  });
+  h += '</div><div class="row"><button class="btn primary" id="dn">'+(done[cur]?"Mark as not done":"Mark module complete")+'</button><span>'+(cur>0?'<button class="btn" id="pv">Previous</button> ':"")+(cur<M.length-1?'<button class="btn" id="nx">Next module</button>':"")+'</span></div>';
+
+  var mn = g("mod");
+  mn.innerHTML = h;
+
+  mn.querySelectorAll("[data-e]").forEach(function(b){
+    b.onclick = function(){ load(m.ex[+b.dataset.e]); };
+  });
+  mn.querySelectorAll("[data-f]").forEach(function(b){
+    b.onclick = function(){ filt = b.dataset.f; render(); };
+  });
+  mn.querySelectorAll(".q").forEach(function(qe){
+    var q = m.quiz[+qe.dataset.q];
+    qe.querySelectorAll(".opt").forEach(function(b){
+      b.onclick = function(){
+        var o = +b.dataset.o;
+        qe.querySelectorAll(".opt").forEach(function(x){ x.classList.remove("ok","bad"); });
+        b.classList.add(o === q[2] ? "ok" : "bad");
+        qe.querySelector(".why").textContent = (o === q[2] ? "Correct! " : "Not quite. ") + q[3];
+      };
+    });
+  });
+
+  g("dn").onclick = function(){
+    done[cur] = !done[cur];
+    save();
+    nav();
+    prog();
+    render();
+  };
+  if(g("pv")) g("pv").onclick = function(){ cur--; filt="All"; nav(); render(); window.scrollTo(0,0); };
+  if(g("nx")) g("nx").onclick = function(){ cur++; filt="All"; nav(); render(); window.scrollTo(0,0); };
+}
+
+g("cmd").value = "grep '^>' | sed 's/>//'";
+g("txt").value = ">Homo_sapiens TP53\nATGCGATCGATCGATCG\n>Mus_musculus Trp53\nATGCGATCGATCGAACG\n>Danio_rerio tp53\nATGCGATCGATCGTTTA";
+g("runbtn").onclick = runPipeline;
+g("cmd").oninput = runPipeline;
+g("txt").oninput = runPipeline;
+
+runPipeline();
+nav();
+render();
+prog();
+</script>
+</body>
+</html>
