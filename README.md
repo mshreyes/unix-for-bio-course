@@ -1,6 +1,6 @@
 # Unix for Biology
 
-A free, self-paced, interactive course on mastering the Unix command line for high-throughput biological data analysis and bioinformatics. Contained entirely in a single standalone HTML page with an embedded interactive biological shell emulator, real-world genomics examples (FASTA, FASTQ, BED, GFF, VCF), self-check quizzes, and curated references.
+A free, self-paced, introductory course the Unix command line for high-throughput biological data analysis and bioinformatics. Contained entirely in a single standalone HTML page with an embedded interactive biological shell emulator, real-world genomics examples (FASTA, FASTQ, BED, GFF, VCF), self-check quizzes, and curated references.
 
 ## Contents
 
