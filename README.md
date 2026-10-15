@@ -38,7 +38,7 @@ Suggestions for new biological command patterns, edge-case scenarios with genomi
 - Textbooks & References: *Bioinformatics Data Skills* by Vince Buffalo (O'Reilly Media), *The AWK Programming Language* by Alfred V. Aho, Brian W. Kernighan, and Peter J. Weinberger, *Advanced Bash-Scripting Guide* by Mendel Cooper
 - Tool Documentation & Standards: [GNU Coreutils & Grep Manuals](https://www.gnu.org/software/coreutils/), [UCSC Genome Browser File Format Guidelines](https://genome.ucsc.edu/FAQ/FAQformat.html), [Bioawk](https://github.com/lh3/bioawk) (Heng Li), [Bioconda](https://bioconda.github.io/), [SLURM Workload Manager](https://slurm.schedmd.com/)
 - Educational Communities & Channels: [Biostars](https://www.biostars.org/), [Rosalind Bioinformatics](https://rosalind.info/), [The Carpentries](https://carpentries.org/), [OMGenomics](https://www.youtube.com/@OMGenomics), [Bioinformatics Coach](https://www.youtube.com/@BioinformaticsCoach)
-- Course architecture, scripting, and instructional drafting: Gemini (Google)
+- Coding assistance: Gemini (Google)
 
 ## License
 
